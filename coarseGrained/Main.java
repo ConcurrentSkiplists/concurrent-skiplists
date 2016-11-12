@@ -1,3 +1,4 @@
+import java.util.*;
 
 public class Main {
 
@@ -5,9 +6,9 @@ public class Main {
 		
 		SkipList sl = new SkipList();
 		
-		Thread t1 = new Thread(sl);
-		Thread t2 = new Thread(sl);
-		Thread t3 = new Thread(sl);
+		Thread t1 = new Thread(new SkipListThread(sl));
+		Thread t2 = new Thread(new SkipListThread(sl));
+		Thread t3 = new Thread(new SkipListThread(sl));
 		
 		t1.start();
 		t2.start();
@@ -20,4 +21,20 @@ public class Main {
 		sl.printHorizontal();
 	}
 
+}
+
+class SkipListThread implements Runnable {
+
+	SkipList sl;
+	
+	public SkipListThread(SkipList sl){
+		this.sl = sl;
+	}
+	
+	@Override
+	public void run() { // need to change
+		sl.put("A", 1);
+		sl.put("B", 2);
+		sl.put("C", 3);
+	}
 }

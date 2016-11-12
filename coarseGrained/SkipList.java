@@ -5,7 +5,7 @@
 import java.util.*;
 
 
-public class SkipList implements Runnable
+public class SkipList
 {
   public SkipListEntry head;    // First element of the top level
   public SkipListEntry tail;    // Last element of the top level
@@ -402,13 +402,5 @@ public class SkipList implements Runnable
 
      return(s);
   }
-
-
-@Override
-public void run() { // need to change
-	this.put("A", 1);
-	this.put("B", 2);
-	this.put("C", 3);
-}
 
 } 
