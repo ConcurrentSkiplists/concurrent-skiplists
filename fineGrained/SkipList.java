@@ -145,9 +145,13 @@ public class SkipList
 			}
 			finally{
 				if(highestLocked != -1){
+					SkipListEntry pred, prevPred = null;
 					for(int layer = highestLocked; layer >= 0; layer--){
-						if(preds[layer].lock.isLocked())
-							preds[layer].lock.unlock();
+						pred = preds[layer];
+						if(pred != prevPred){
+							pred.lock.unlock();
+							prevPred = pred;
+						}
 					}
 				}
 			}
@@ -207,9 +211,13 @@ public class SkipList
 				}
 				finally{
 					if(highestLocked != -1){
+						SkipListEntry pred, prevPred = null;
 						for(int layer = highestLocked; layer >= 0; layer--){
-							if(preds[layer].lock.isLocked())
-								preds[layer].lock.unlock();
+							pred = preds[layer];
+							if(pred != prevPred){
+								pred.lock.unlock();
+								prevPred = pred;
+							}
 						}
 					}
 				}
