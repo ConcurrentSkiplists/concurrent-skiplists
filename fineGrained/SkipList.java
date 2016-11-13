@@ -7,6 +7,8 @@ import java.util.*;
 
 public class SkipList
 {
+
+	public static final int MAXHEIGHT = 32;
   public SkipListEntry head;    // First element of the top level
   public SkipListEntry tail;    // Last element of the top level
 
@@ -31,378 +33,189 @@ public class SkipList
   { 
      SkipListEntry p1, p2;
 
-     p1 = new SkipListEntry(SkipListEntry.negInf, null);
-     p2 = new SkipListEntry(SkipListEntry.posInf, null);
+     p1 = new SkipListEntry(SkipListEntry.negInf, null, 0);
+     p2 = new SkipListEntry(SkipListEntry.posInf, null, 0);
 
      head = p1;
      tail = p2;
-
-     p1.right = p2;
-     p2.left = p1;
+     
+     for(int layer = 0; layer < maxHeight(); layer ++){
+     	 p1.nexts[layer] = p2;
+     }
 
      n = 0;
      h = 0;
 
      r = new Random();
   }
-
-
-  /** Returns the number of entries in the hash table. */
-  public int size() 
-  { 
-    return n; 
-  }
-
-  /** Returns whether or not the table is empty. */
-  public boolean isEmpty() 
-  { 
-    return (n == 0); 
-  }
-
-  /* ------------------------------------------------------
-     findEntry(k): find the largest key x <= k
-		   on the LOWEST level of the Skip List
-     ------------------------------------------------------ */
-  public SkipListEntry findEntry(String k)
-  {
-     SkipListEntry p;
-
-     /* -----------------
-	Start at "head"
-	----------------- */
-     p = head;
-
-     while ( true )
-     {
-        /* --------------------------------------------
-	   Search RIGHT until you find a LARGER entry
-
-           E.g.: k = 34
-
-                     10 ---> 20 ---> 30 ---> 40
-                                      ^
-                                      |
-                                      p stops here
-		p.right.key = 40
-	   -------------------------------------------- */
-        while ( p.right.key != SkipListEntry.posInf && 
-		p.right.key.compareTo(k) <= 0 )
-	{
-           p = p.right;
-//         System.out.println(">>>> " + p.key);
+  
+  /////////////////////////////////////////////////////////////////////////////
+  int maxHeight(){
+	  return MAXHEIGHT;
 	}
-
-	/* ---------------------------------
-	   Go down one level if you can...
-	   --------------------------------- */
-	if ( p.down != null )
-        {  
-           p = p.down;
-//         System.out.println("vvvv " + p.key);
-        }
-        else
-	   break;	// We reached the LOWEST level... Exit...
-     }
-
-     return(p);         // p.key <= k
-  }
-
-
-  /** Returns the value associated with a key. */
-  public synchronized Integer get (String k) 
-  {
-     SkipListEntry p;
-
-     p = findEntry(k);
-
-     if ( !k.equals( p.getKey() ) )
-        return null;
-        
-     int rand = r.nextInt(10);   
-     
-     return(p.value);
-  }
-
-  /* ------------------------------------------------------------------
-     insertAfterAbove(p, q, y=(k,v) )
- 
-        1. create new entry (k,v)
-	2. insert (k,v) AFTER p
-	3. insert (k,v) ABOVE q
-
-             p <--> (k,v) <--> p.right
-                      ^
-		      |
-		      v
-		      q
-
-      Returns the reference of the newly created (k,v) entry
-     ------------------------------------------------------------------ */
-  public SkipListEntry insertAfterAbove(SkipListEntry p, SkipListEntry q, 
-                                         String k)
-  {
-     SkipListEntry e;
-
-     e = new SkipListEntry(k, null);
-
-     /* ---------------------------------------
-	Use the links before they are changed !
-	--------------------------------------- */
-     e.left = p;
-     e.right = p.right;
-     e.down = q;
-
-     /* ---------------------------------------
-	Now update the existing links..
-	--------------------------------------- */
-     p.right.left = e;
-     p.right = e;
-     q.up = e;
-
-     return(e);
-  }
-
-  /** Put a key-value pair in the map, replacing previous one if it exists. */
-  public synchronized Integer put (String k, Integer v) 
-  {
-     SkipListEntry p, q;
-     int       i;
-
-     p = findEntry(k);
-
-//   System.out.println("findEntry(" + k + ") returns: " + p.key);
-     /* ------------------------
-	Check if key is found
-	------------------------ */
-     if ( k.equals( p.getKey() ) )
-     {
-        Integer old = p.value;
-
-	p.value = v;
-
-    	return(old);
-     }
-
-     /* ------------------------
-	Insert new entry (k,v)
-	------------------------ */
-
-     /* ------------------------------------------------------
-        **** BUG: He forgot to insert in the lowest level !!!
-	Link at the lowest level
-	------------------------------------------------------ */
-     q = new SkipListEntry(k, v);
-     q.left = p;
-     q.right = p.right;
-     p.right.left = q;
-     p.right = q;
-
-     i = 0;                   // Current level = 0
-
-     while ( r.nextDouble() < 0.5 )
-     {
-	// Coin flip success: make one more level....
-
-//	System.out.println("i = " + i + ", h = " + h );
-
-	/* ---------------------------------------------
-	   Check if height exceed current height.
- 	   If so, make a new EMPTY level
-	   --------------------------------------------- */
-        if ( i >= h )
-   	{
-           SkipListEntry p1, p2;
-
-	   h = h + 1;
-
-           p1 = new SkipListEntry(SkipListEntry.negInf,null);
-           p2 = new SkipListEntry(SkipListEntry.posInf,null);
-   
-	   p1.right = p2;
-	   p1.down  = head;
-
-	   p2.left = p1;
-	   p2.down = tail;
-
-	   head.up = p1;
-	   tail.up = p2;
-
-	   head = p1;
-	   tail = p2;
+	
+	int randomLevel(int maxHeight){
+		int i = 0;
+		while(r.nextDouble() < 0.5){
+			i ++;
+		}
+		return i;
 	}
-
-
-	/* -------------------------
-	   Scan backwards...
-	   ------------------------- */
-	while ( p.up == null )
-	{
-//	   System.out.print(".");
-	   p = p.left;
+  
+  int findNode(String k, SkipListEntry[] preds, SkipListEntry[] succs) {
+  	int lFound = -1;
+  	SkipListEntry pred = head;
+  	for (int layer = maxHeight() - 1; layer >= 0; layer --){
+  	  SkipListEntry curr = pred.nexts[layer];
+  	  while(k.compareTo(curr.key) > 0) {
+  	  	pred = curr;
+  	  	curr = pred.nexts[layer];
+  	  }
+  	  if (lFound == -1 && k.equals(curr.key)){
+  	  	lFound = layer;
+  	  }
+  	  preds[layer] = pred;
+  	  succs[layer] = curr;
+  	}
+  	return lFound;
+  }
+  
+  Integer get(String k) {
+  	SkipListEntry[] preds = new SkipListEntry[maxHeight()];
+		SkipListEntry[] succs = new SkipListEntry[maxHeight()];
+		int lFound = findNode(k, preds, succs);
+		
+		if (lFound == -1)
+			return null;
+			
+		if(lFound != -1) {
+			SkipListEntry nodeFound = succs[lFound];
+			if (!nodeFound.marked) {
+				while(!nodeFound.fullyLinked){}
+				return nodeFound.value;
+			} else {
+				return null;
+			}
+		}
+		
+		return null;
 	}
-
-//	System.out.print("1 ");
-
-	p = p.up;
-
-
-	/* ---------------------------------------------
-           Add one more (k,v) to the column
-	   --------------------------------------------- */
-   	SkipListEntry e;
-   		 
-   	e = new SkipListEntry(k, null);  // Don't need the value...
-   		 
-   	/* ---------------------------------------
-   	   Initialize links of e
-   	   --------------------------------------- */
-   	e.left = p;
-   	e.right = p.right;
-   	e.down = q;
-   		 
-   	/* ---------------------------------------
-   	   Change the neighboring links..
-   	   --------------------------------------- */
-   	p.right.left = e;
-   	p.right = e;
-   	q.up = e;
-
-        q = e;		// Set q up for the next iteration
-
-        i = i + 1;	// Current level increased by 1
-
-     }
-
-     n = n + 1;
-
-     return(null);   // No old value
-  }
-
-  /** Removes the key-value pair with a specified key. */
-  public synchronized Integer remove (String key) 
-  {
-     //return(null);
-	 SkipListEntry p = findEntry(key);
-	 
-	 if (p.getKey() != key){
-		 return null; // we did not find the entry
-	 }
-	 
-	 while (p != null){
-		 p.left.right = p.right;
-		 p.right.left = p.left;
-	 }
-	 
-	 return p.getValue(); // return the removed entry 
-  }
-
-  public void printHorizontal()
-  {
-     String s = "";
-     int i;
-
-     SkipListEntry p;
-
-     /* ----------------------------------
-	Record the position of each entry
-	---------------------------------- */
-     p = head;
-
-     while ( p.down != null )
-     {
-        p = p.down;
-     }
-
-     i = 0;
-     while ( p != null )
-     {
-        p.pos = i++;
-        p = p.right;
-     }
-
-     /* -------------------
-	Print...
-	------------------- */
-     p = head;
-
-     while ( p != null )
-     {
-        s = getOneRow( p );
-	System.out.println(s);
-
-        p = p.down;
-     }
-  }
-
-  public String getOneRow( SkipListEntry p )
-  {
-     String s;
-     int a, b, i;
-
-     a = 0;
-
-     s = "" + p.key;
-     p = p.right;
-
-
-     while ( p != null )
-     {
-        SkipListEntry q;
-
-        q = p;
-        while (q.down != null)
-	   q = q.down;
-        b = q.pos;
-
-        s = s + " <-";
-
-
-        for (i = a+1; i < b; i++)
-           s = s + "--------";
- 
-        s = s + "> " + p.key;
-
-        a = b;
-
-        p = p.right;
-     }
-
-     return(s);
-  }
-
-  public void printVertical()
-  {
-     String s = "";
-
-     SkipListEntry p;
-
-     p = head;
-
-     while ( p.down != null )
-        p = p.down;
-
-     while ( p != null )
-     {
-        s = getOneColumn( p );
-	System.out.println(s);
-
-        p = p.right;
-     }
-  }
-
-
-  public String getOneColumn( SkipListEntry p )
-  {
-     String s = "";
-
-     while ( p != null )
-     {
-        s = s + " " + p.key;
-
-        p = p.up;
-     }
-
-     return(s);
-  }
-
+  
+  boolean add(String k, Integer value) {
+  	int topLayer = randomLevel(maxHeight());
+		SkipListEntry[] preds = new SkipListEntry[maxHeight()];
+		SkipListEntry[] succs = new SkipListEntry[maxHeight()];
+		
+		while(true) {
+			int lFound = findNode(k, preds, succs);
+			if(lFound != -1) {
+				SkipListEntry nodeFound = succs[lFound];
+				if (!nodeFound.marked) {
+					while(!nodeFound.fullyLinked){}
+					nodeFound.value = value; return true;
+				}
+				continue;
+			}
+			int highestLocked = -1;
+			try {
+				SkipListEntry pred, succ, prevPred;
+				prevPred = null;
+				boolean valid = true;
+				for(int layer = 0; valid && (layer <= topLayer); layer++){
+					//if(preds[0].topLayer < layer) break;
+					pred = preds[layer];
+					succ = succs[layer];
+					if(pred != prevPred){
+						pred.lock.lock();
+						highestLocked = layer;
+						prevPred = pred;
+					}
+					valid = !pred.marked && !succ.marked && pred.nexts[layer] == succ;
+				}
+				if(!valid) continue;
+				
+				SkipListEntry newNode = new SkipListEntry(k, value, topLayer);
+				for(int layer = 0; layer <= topLayer; layer++){
+					newNode.nexts[layer] = succs[layer];
+					preds[layer].nexts[layer] = newNode;
+				}
+				
+				newNode.fullyLinked = true;
+				return true;
+			}
+			finally{
+				if(highestLocked != -1){
+					for(int layer = highestLocked; layer >= 0; layer--){
+						if(preds[layer].lock.isLocked())
+							preds[layer].lock.unlock();
+					}
+				}
+			}
+		}
+	}
+	
+	boolean okToDelete(SkipListEntry candidate, int lFound) {
+		return (candidate.fullyLinked
+			&& candidate.topLayer == lFound
+			&& !candidate.marked);
+	}
+	
+	boolean remove(String k) {
+		SkipListEntry nodeToDelete = null;
+		boolean isMarked = false;
+		int topLayer = -1;
+		SkipListEntry[] preds = new SkipListEntry[maxHeight()];
+		SkipListEntry[] succs = new SkipListEntry[maxHeight()];
+		
+		while(true) {
+			int lFound = findNode(k, preds, succs);
+			if (isMarked ||
+				 (lFound != -1 && okToDelete(succs[lFound], lFound))) {
+				
+				if (!isMarked) {
+					nodeToDelete = succs[lFound];
+					topLayer = nodeToDelete.topLayer;
+					nodeToDelete.lock.lock();
+					if (nodeToDelete.marked) {
+						nodeToDelete.lock.unlock();
+						return false;
+					}
+					nodeToDelete.marked = true;
+					isMarked = true;
+				}
+				int highestLocked = -1;
+				try {
+					SkipListEntry pred, succ, prevPred = null;
+					boolean valid = true;
+					for(int layer = 0; valid && (layer <= topLayer); layer ++){
+						pred = preds[layer];
+						succ = succs[layer];
+						if (pred != prevPred) {
+							pred.lock.lock();
+							highestLocked = layer;
+							prevPred = pred;
+						}
+						valid = !pred.marked && pred.nexts[layer] == succ;
+					}
+					if(!valid) continue;
+					
+					for(int layer = topLayer; layer >= 0; layer--){
+						preds[layer].nexts[layer] = nodeToDelete.nexts[layer];
+					}
+					nodeToDelete.lock.unlock();
+					return true;
+				}
+				finally{
+					if(highestLocked != -1){
+						for(int layer = highestLocked; layer >= 0; layer--){
+							preds[layer].lock.unlock();
+						}
+					}
+				}
+			} else {
+				return false;
+			}
+		}
+	}
+					
 } 

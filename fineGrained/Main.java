@@ -43,7 +43,7 @@ class SkipListTest implements Runnable {
 		for(int i = 0; i < putN; i ++) {
 			String name = Integer.toString(i);
 			names.add(name);
-			sl.put(name, i);
+			sl.add(name, i);
 		}
 		
 		for(int i = 0; i < getN; i ++) {
@@ -53,48 +53,66 @@ class SkipListTest implements Runnable {
 	}
 }
 
-class SkipListBenchmarkGet implements Runnable {
+class SkipListTest2 implements Runnable {
 
 	SkipList sl;
 	
-	public SkipListBenchmarkGet(SkipList sl){
+	public SkipListTest2(SkipList sl){
 		this.sl = sl;
 	}
 	
 	@Override
 	public void run() {
-		Random r = new Random();
+		sl.add("A", 2);
+		sl.add("B", 12);
+		sl.add("C", 42);
 		
-		int N = 1000;
-		
-		ArrayList<String> names = new ArrayList<>();
-		for(int i = 0; i < N; i ++) {
-			String name = Integer.toString(i);
-			names.add(name);
-			sl.put(name, i);
-		}
-		
-		int numberOfTimes = 200;
-		long totalTime = 0;
-		for(int k = 0; k < numberOfTimes; k ++){
-			Collections.shuffle(names, new Random(System.nanoTime()));
-		
-			int commonIndex = r.nextInt(N);
-		
-			long time1 = System.nanoTime();
-			for(int i = 0; i < N; i ++) {
-				int rand = r.nextInt(2 * N);
-				if(rand >= N){
-					sl.get(names.get(commonIndex));
-				} else {
-					sl.get(names.get(rand));
-				}
-			}
-			long time2 = System.nanoTime();
-			
-			totalTime += (time2 - time1);
-		}
-		
-		System.out.println("Average time taken: " + ((double)totalTime / numberOfTimes) + " ns");
+		System.out.println(sl.get("B"));
 	}
 }
+
+//class SkipListBenchmarkGet implements Runnable {
+
+//	SkipList sl;
+//	
+//	public SkipListBenchmarkGet(SkipList sl){
+//		this.sl = sl;
+//	}
+//	
+//	@Override
+//	public void run() {
+//		Random r = new Random();
+//		
+//		int N = 1000;
+//		
+//		ArrayList<String> names = new ArrayList<>();
+//		for(int i = 0; i < N; i ++) {
+//			String name = Integer.toString(i);
+//			names.add(name);
+//			sl.put(name, i);
+//		}
+//		
+//		int numberOfTimes = 200;
+//		long totalTime = 0;
+//		for(int k = 0; k < numberOfTimes; k ++){
+//			Collections.shuffle(names, new Random(System.nanoTime()));
+//		
+//			int commonIndex = r.nextInt(N);
+//		
+//			long time1 = System.nanoTime();
+//			for(int i = 0; i < N; i ++) {
+//				int rand = r.nextInt(2 * N);
+//				if(rand >= N){
+//					sl.get(names.get(commonIndex));
+//				} else {
+//					sl.get(names.get(rand));
+//				}
+//			}
+//			long time2 = System.nanoTime();
+//			
+//			totalTime += (time2 - time1);
+//		}
+//		
+//		System.out.println("Average time taken: " + ((double)totalTime / numberOfTimes) + " ns");
+//	}
+//}

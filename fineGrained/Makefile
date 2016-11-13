@@ -2,7 +2,7 @@
 
 build:
 	mkdir -p build
-	javac *.java -d build
+	javac SkipListEntry.java SkipList.java Main.java -d build
 run: build
 	java -cp build Main
 clean:
