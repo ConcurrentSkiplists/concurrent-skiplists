@@ -208,7 +208,8 @@ public class SkipList
 				finally{
 					if(highestLocked != -1){
 						for(int layer = highestLocked; layer >= 0; layer--){
-							preds[layer].lock.unlock();
+							if(preds[layer].lock.isLocked())
+								preds[layer].lock.unlock();
 						}
 					}
 				}
