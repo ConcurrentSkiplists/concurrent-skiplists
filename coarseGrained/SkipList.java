@@ -115,10 +115,12 @@ public class SkipList
 
      p = findEntry(k);
 
-     if ( k.equals( p.getKey() ) )
-        return(p.value);
-     else
-        return(null);
+     if ( !k.equals( p.getKey() ) )
+        return null;
+        
+     int rand = r.nextInt(10);   
+     
+     return(p.value);
   }
 
   /* ------------------------------------------------------------------
