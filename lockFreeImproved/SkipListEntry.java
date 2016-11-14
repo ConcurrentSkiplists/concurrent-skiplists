@@ -27,7 +27,7 @@ public class SkipListEntry {
 	public SkipListEntry(String key, Integer x, int height) {
 		value = x;
 		this.key = key;
-		next = (AtomicMarkableReference<SkipListEntry>[]) new AtomicMarkableReference[height + 1];
+		next = (AtomicMarkableReference<SkipListEntry>[]) new AtomicMarkableReference[MAX_LEVEL + 1];
 		for (int i = 0; i < next.length; i++) {
 			next[i] = new AtomicMarkableReference<SkipListEntry>(null,false);
 		}

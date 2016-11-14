@@ -135,6 +135,14 @@ public final class SkipList {
 	}
 	
 	Integer get(String key) {
+		if(r.nextDouble() < 0.1) {
+			return getWithAdd(key);
+		} else {
+			return getWithoutAdd(key);
+		}
+	}
+	
+	Integer getWithoutAdd(String key) {
 		int bottomLevel = 0;
 		boolean[] marked = {false};
 		SkipListEntry pred = head, curr = null, succ = null;
@@ -161,24 +169,36 @@ public final class SkipList {
 		}
 	}
 
-//	Integer get(String key) {
-//		SkipListEntry[] preds = (SkipListEntry[]) new SkipListEntry[MAX_LEVEL + 1];
-//		SkipListEntry[] succs = (SkipListEntry[]) new SkipListEntry[MAX_LEVEL + 1];
-//		
-//		boolean found = find(key, preds, succs);
-//		if(!found) return null;
-//		
-//		SkipListEntry nodeFound = succs[0];
-//		
-//		if(nodeFound.topLevel == MAX_LEVEL) return nodeFound.value;
-//		
-//		int newTopLevel = nodeFound.topLevel + 1;
-//		preds[newTopLevel].next[newTopLevel].set(nodeFound, true);
-//		
-//		nodeFound.topLevel = newTopLevel;
-//		
-//		return nodeFound.value;
-//	}
+	Integer getWithAdd(String key) {
+		int bottomLevel = 0;
+		SkipListEntry[] preds = (SkipListEntry[]) new SkipListEntry[MAX_LEVEL + 1];
+		SkipListEntry[] succs = (SkipListEntry[]) new SkipListEntry[MAX_LEVEL + 1];
+
+		boolean found = find(key, preds, succs);
+		if (!found) {
+			return null;
+		} else {
+			SkipListEntry nodeFound = succs[0];
+			int topLevel = nodeFound.topLevel + 1; // new top level
+			
+			if(topLevel > MAX_LEVEL)
+				return nodeFound.value;
+			
+			SkipListEntry pred;
+			SkipListEntry succ = succs[topLevel];
+			nodeFound.next[topLevel].set(succ, false);
+			
+			while (true) {
+				pred = preds[topLevel];
+				succ = succs[topLevel];
+				if (pred.next[topLevel].compareAndSet(succ, nodeFound, false, false))
+					break;
+				find(key, preds, succs);
+			}
+			nodeFound.topLevel = topLevel;
+			return nodeFound.value;
+		}
+	}
 }
 	
 	
