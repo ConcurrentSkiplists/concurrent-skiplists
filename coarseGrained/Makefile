@@ -4,6 +4,6 @@ build:
 	mkdir -p build
 	javac *.java -d build
 run: build
-	java -cp build Main
+	java -cp build coarseGrained.Main
 clean:
 	rm -r build

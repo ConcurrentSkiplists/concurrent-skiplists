@@ -1,3 +1,5 @@
+package coarseGrained;
+
 import java.util.*;
 
 public class Main {
