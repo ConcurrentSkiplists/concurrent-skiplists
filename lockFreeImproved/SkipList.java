@@ -158,7 +158,25 @@ public final class SkipList {
 			return null;
 		}
 	}
-	
+
+//	Integer get(String key) {
+//		SkipListEntry[] preds = (SkipListEntry[]) new SkipListEntry[MAX_LEVEL + 1];
+//		SkipListEntry[] succs = (SkipListEntry[]) new SkipListEntry[MAX_LEVEL + 1];
+//		
+//		boolean found = find(key, preds, succs);
+//		if(!found) return null;
+//		
+//		SkipListEntry nodeFound = succs[0];
+//		
+//		if(nodeFound.topLevel == MAX_LEVEL) return nodeFound.value;
+//		
+//		int newTopLevel = nodeFound.topLevel + 1;
+//		preds[newTopLevel].next[newTopLevel].set(nodeFound, true);
+//		
+//		nodeFound.topLevel = newTopLevel;
+//		
+//		return nodeFound.value;
+//	}
 }
 	
 	
