@@ -7,7 +7,7 @@ package fineGrainedImproved;
 import java.util.*;
 
 
-public class SkipList
+public class SkipList implements skipListInterface.SkipListInterface
 {
 
 	public static final int MAXHEIGHT = 32;
@@ -82,7 +82,7 @@ public class SkipList
   	return lFound;
   }
   
-  Integer get(String k) {
+  public Integer get(String k) {
   	SkipListEntry[] preds = new SkipListEntry[maxHeight()];
 		SkipListEntry[] succs = new SkipListEntry[maxHeight()];
 		int lFound = findNode(k, preds, succs);
@@ -112,7 +112,7 @@ public class SkipList
 		return null;
 	}
   
-  boolean add(String k, Integer value) {
+  public boolean add(String k, Integer value) {
   	int topLayer = randomLevel(maxHeight());
 		SkipListEntry[] preds = new SkipListEntry[maxHeight()];
 		SkipListEntry[] succs = new SkipListEntry[maxHeight()];
@@ -175,7 +175,7 @@ public class SkipList
 			&& !candidate.marked);
 	}
 	
-	boolean remove(String k) {
+	public boolean remove(String k) {
 		SkipListEntry nodeToDelete = null;
 		boolean isMarked = false;
 		int topLayer = -1;

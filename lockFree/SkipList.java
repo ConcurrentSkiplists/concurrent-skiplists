@@ -3,7 +3,7 @@ package lockFree;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 
-public final class SkipList {
+public final class SkipList implements skipListInterface.SkipListInterface {
 	public static final int MAX_LEVEL = 32 - 1;
 	final SkipListEntry head = new SkipListEntry("! -oo");
 	final SkipListEntry tail = new SkipListEntry("~ +oo");
@@ -25,7 +25,7 @@ public final class SkipList {
 		}
 	}
 	
-	boolean add(String key, Integer value) {
+	public boolean add(String key, Integer value) {
 		int topLevel = randomLevel();
 		int bottomLevel = 0;
 		SkipListEntry[] preds = (SkipListEntry[]) new SkipListEntry[MAX_LEVEL + 1];
@@ -64,7 +64,7 @@ public final class SkipList {
 		}
 	}
 	
-	boolean remove(String key) {
+	public boolean remove(String key) {
 		int bottomLevel = 0;
 		SkipListEntry[] preds = (SkipListEntry[]) new SkipListEntry[MAX_LEVEL + 1];
 		SkipListEntry[] succs = (SkipListEntry[]) new SkipListEntry[MAX_LEVEL + 1];
@@ -134,7 +134,7 @@ public final class SkipList {
 			}
 	}
 	
-	Integer get(String key) {
+	public Integer get(String key) {
 		int bottomLevel = 0;
 		boolean[] marked = {false};
 		SkipListEntry pred = head, curr = null, succ = null;
