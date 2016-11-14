@@ -8,6 +8,11 @@ env:
   - TEST_DIR=lockFreeImproved
 before_install: true
 install: true
+before_build:
+  - jdk_switcher use oraclejdk8
+build: 
+  - cd coarseGrained && make
+  - cd $TEST_DIR && make
 before_script: 
   - jdk_switcher use oraclejdk8
 script:
