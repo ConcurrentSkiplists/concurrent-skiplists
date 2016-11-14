@@ -92,11 +92,15 @@ public class SkipList
 			SkipListEntry nodeFound = succs[lFound];
 			if (!nodeFound.marked) {
 				while(!nodeFound.fullyLinked){}
-				int topLayer = nodeFound.topLayer + 1;
-				if (topLayer >= maxHeight()) {
-					preds[topLayer].nexts[topLayer] = nodeFound;
-					nodeFound.topLayer = topLayer;
-				}				
+				
+				if(r.nextDouble() < 0.1) {
+					int topLayer = nodeFound.topLayer + 1;
+					if(topLayer < MAXHEIGHT) {
+						preds[topLayer].nexts[topLayer] = nodeFound;
+						nodeFound.nexts[topLayer] = succs[topLayer];
+						nodeFound.topLayer = topLayer;
+					}
+				}			
 				return nodeFound.value;
 			} else {
 				return null;
