@@ -13,12 +13,12 @@
 }
 
 </style>
-<svg width="1000" height="600"></svg>
+<svg width="1280" height="800"></svg>
 <script src="//d3js.org/d3.v4.min.js"></script>
 <script>
 
 var svg = d3.select("svg"),
-    margin = {top: 20, right: 80, bottom: 30, left: 80},
+    margin = {top: 20, right: 80, bottom: 30, left: 160},
     width = svg.attr("width") - margin.left - margin.right,
     height = svg.attr("height") - margin.top - margin.bottom,
     g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -44,7 +44,7 @@ d3.tsv("{{.Path}}/data.tsv", type, function(error, data) {
     };
   });
 
-  x.domain(d3.extent(data, function(d) { console.log(d.threads); return d.threads; }));
+  x.domain(d3.extent(data, function(d) { return d.threads; }));
 
   y.domain([
     d3.min(algos, function(c) { return 0; }),
@@ -56,8 +56,14 @@ d3.tsv("{{.Path}}/data.tsv", type, function(error, data) {
   g.append("g")
       .attr("class", "axis axis--x")
       .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x))
+    .append("text")
+      .attr("x", 25)
+      .attr("dy", "2em")
+      .attr("fill", "#000")
       .style("font", "12px sans-serif")
-      .call(d3.axisBottom(x));
+      .text("Threads");
+
 
   g.append("g")
       .attr("class", "axis axis--y")

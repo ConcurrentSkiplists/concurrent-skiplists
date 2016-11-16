@@ -123,7 +123,7 @@ public class Benchmark {
                     sb.append(SEP);
                     sb.append(e.getKey());
                 }
-                sb.append(SEP);
+                sb.append("\n");
             }
 
             // Row.
