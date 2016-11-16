@@ -16,8 +16,6 @@ var args = struct {
 	Data string
 }{}
 
-var tmpl = template.Must(template.ParseFiles("index.tmpl"))
-
 func latestTimestamp() (int, error) {
 	infos, err := ioutil.ReadDir(args.Data)
 	if err != nil {
@@ -40,6 +38,7 @@ func latestTimestamp() (int, error) {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	var tmpl = template.Must(template.ParseFiles("index.tmpl"))
 	log.Println(r.URL)
 
 	ts := r.FormValue("timestamp")
