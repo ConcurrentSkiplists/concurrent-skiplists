@@ -4,7 +4,9 @@ package coarseGrained;
  * Copied from: http://www.mathcs.emory.edu/~cheung/Courses/323/Syllabus/Map/skip-list-impl.html
  * */
 
-import java.util.*;
+import java.util.Random;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 public class SkipList
@@ -17,6 +19,8 @@ public class SkipList
 
   public int h;       // Height
   public Random r;    // Coin toss
+
+  Lock mutex;
 
   /* ----------------------------------------------
      Constructor: empty skiplist
@@ -46,6 +50,8 @@ public class SkipList
      h = 0;
 
      r = new Random();
+
+     mutex = new ReentrantLock();
   }
 
 
@@ -111,18 +117,23 @@ public class SkipList
 
 
   /** Returns the value associated with a key. */
-  public synchronized Integer get (String k) 
+  public Integer get (String k)
   {
-     SkipListEntry p;
+     mutex.lock();
+     try {
+         SkipListEntry p;
 
-     p = findEntry(k);
+         p = findEntry(k);
 
-     if ( !k.equals( p.getKey() ) )
-        return null;
-        
-     int rand = r.nextInt(10);   
-     
-     return(p.value);
+         if ( !k.equals( p.getKey() ) )
+             return null;
+
+         int rand = r.nextInt(10);
+
+         return(p.value);
+     } finally {
+         mutex.unlock();
+     }
   }
 
   /* ------------------------------------------------------------------
@@ -165,25 +176,27 @@ public class SkipList
   }
 
   /** Put a key-value pair in the map, replacing previous one if it exists. */
-  public synchronized Integer put (String k, Integer v) 
+  public Integer put (String k, Integer v)
   {
-     SkipListEntry p, q;
-     int       i;
+     mutex.lock();
+     try {
+         SkipListEntry p, q;
+         int       i;
 
-     p = findEntry(k);
+         p = findEntry(k);
 
 //   System.out.println("findEntry(" + k + ") returns: " + p.key);
      /* ------------------------
 	Check if key is found
 	------------------------ */
-     if ( k.equals( p.getKey() ) )
-     {
-        Integer old = p.value;
+         if ( k.equals( p.getKey() ) )
+         {
+             Integer old = p.value;
 
-	p.value = v;
+             p.value = v;
 
-    	return(old);
-     }
+             return(old);
+         }
 
      /* ------------------------
 	Insert new entry (k,v)
@@ -193,17 +206,17 @@ public class SkipList
         **** BUG: He forgot to insert in the lowest level !!!
 	Link at the lowest level
 	------------------------------------------------------ */
-     q = new SkipListEntry(k, v);
-     q.left = p;
-     q.right = p.right;
-     p.right.left = q;
-     p.right = q;
+         q = new SkipListEntry(k, v);
+         q.left = p;
+         q.right = p.right;
+         p.right.left = q;
+         p.right = q;
 
-     i = 0;                   // Current level = 0
+         i = 0;                   // Current level = 0
 
-     while ( r.nextDouble() < 0.5 )
-     {
-	// Coin flip success: make one more level....
+         while ( r.nextDouble() < 0.5 )
+         {
+             // Coin flip success: make one more level....
 
 //	System.out.println("i = " + i + ", h = " + h );
 
@@ -211,91 +224,98 @@ public class SkipList
 	   Check if height exceed current height.
  	   If so, make a new EMPTY level
 	   --------------------------------------------- */
-        if ( i >= h )
-   	{
-           SkipListEntry p1, p2;
+             if ( i >= h )
+             {
+                 SkipListEntry p1, p2;
 
-	   h = h + 1;
+                 h = h + 1;
 
-           p1 = new SkipListEntry(SkipListEntry.negInf,null);
-           p2 = new SkipListEntry(SkipListEntry.posInf,null);
-   
-	   p1.right = p2;
-	   p1.down  = head;
+                 p1 = new SkipListEntry(SkipListEntry.negInf,null);
+                 p2 = new SkipListEntry(SkipListEntry.posInf,null);
 
-	   p2.left = p1;
-	   p2.down = tail;
+                 p1.right = p2;
+                 p1.down  = head;
 
-	   head.up = p1;
-	   tail.up = p2;
+                 p2.left = p1;
+                 p2.down = tail;
 
-	   head = p1;
-	   tail = p2;
-	}
+                 head.up = p1;
+                 tail.up = p2;
+
+                 head = p1;
+                 tail = p2;
+             }
 
 
 	/* -------------------------
 	   Scan backwards...
 	   ------------------------- */
-	while ( p.up == null )
-	{
+             while ( p.up == null )
+             {
 //	   System.out.print(".");
-	   p = p.left;
-	}
+                 p = p.left;
+             }
 
 //	System.out.print("1 ");
 
-	p = p.up;
+             p = p.up;
 
 
 	/* ---------------------------------------------
            Add one more (k,v) to the column
 	   --------------------------------------------- */
-   	SkipListEntry e;
-   		 
-   	e = new SkipListEntry(k, null);  // Don't need the value...
-   		 
+             SkipListEntry e;
+
+             e = new SkipListEntry(k, null);  // Don't need the value...
+
    	/* ---------------------------------------
    	   Initialize links of e
    	   --------------------------------------- */
-   	e.left = p;
-   	e.right = p.right;
-   	e.down = q;
-   		 
+             e.left = p;
+             e.right = p.right;
+             e.down = q;
+
    	/* ---------------------------------------
    	   Change the neighboring links..
    	   --------------------------------------- */
-   	p.right.left = e;
-   	p.right = e;
-   	q.up = e;
+             p.right.left = e;
+             p.right = e;
+             q.up = e;
 
-        q = e;		// Set q up for the next iteration
+             q = e;		// Set q up for the next iteration
 
-        i = i + 1;	// Current level increased by 1
+             i = i + 1;	// Current level increased by 1
 
+         }
+
+         n = n + 1;
+
+         return(null);   // No old value
+     } finally {
+         mutex.unlock();
      }
-
-     n = n + 1;
-
-     return(null);   // No old value
   }
 
   /** Removes the key-value pair with a specified key. */
-  public synchronized Integer remove (String key) 
+  public Integer remove (String key)
   {
-     //return(null);
-	 SkipListEntry p = findEntry(key);
-	 
-	 if (p.getKey() != key){
-		 return null; // we did not find the entry
-	 }
-	 
-	 while (p != null){
-		 p.left.right = p.right;
-		 p.right.left = p.left;
-	 }
-	 
-	 return p.getValue(); // return the removed entry 
+     mutex.lock();
+     try {
+         SkipListEntry p = findEntry(key);
+
+         if (p.getKey() != key){
+             return null; // we did not find the entry
+         }
+
+         while (p != null){
+             p.left.right = p.right;
+             p.right.left = p.left;
+         }
+
+         return p.getValue(); // return the removed entry
+     } finally {
+         mutex.unlock();
+     }
   }
 
   public void printHorizontal()

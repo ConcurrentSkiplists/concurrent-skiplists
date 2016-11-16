@@ -1,9 +1,11 @@
 package coarseGrained_updateImproved;
 
-import java.util.*;
+import java.util.Random;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 
-public class SkipList
+public class SkipList implements skipListInterface.SkipListInterface
 {
 
 	public static final int MAXHEIGHT = 32;
@@ -15,6 +17,8 @@ public class SkipList
 
   public int h;       // Height
   public Random r;    // Coin toss
+
+	Lock mutex;
 
   public SkipList()     // Default constructor...
   { 
@@ -34,6 +38,7 @@ public class SkipList
      h = 0;
 
      r = new Random();
+	  mutex = new ReentrantLock();
   }
   
   int maxHeight(){
@@ -66,80 +71,95 @@ public class SkipList
   	return lFound;
   }
   
-  synchronized Integer get(String k) {
-  	SkipListEntry[] preds = new SkipListEntry[maxHeight()];
-		SkipListEntry[] succs = new SkipListEntry[maxHeight()];
-		int lFound = findNode(k, preds, succs);
-		
-		if (lFound == -1)
-			return null;
-			
-		if(lFound != -1) {
-			SkipListEntry nodeFound = succs[lFound];
-			if(r.nextDouble() < 0.1) {
-				int topLayer = nodeFound.topLayer + 1;
-				if(topLayer < MAXHEIGHT) {
-					preds[topLayer].nexts[topLayer] = nodeFound;
-					nodeFound.nexts[topLayer] = succs[topLayer];
-					nodeFound.topLayer = topLayer;
-				}
-			}
-			return nodeFound.value;
-		}
-		
-		return null;
+  public Integer get(String k) {
+	  mutex.lock();
+	  try {
+		  SkipListEntry[] preds = new SkipListEntry[maxHeight()];
+		  SkipListEntry[] succs = new SkipListEntry[maxHeight()];
+		  int lFound = findNode(k, preds, succs);
+
+		  if (lFound == -1)
+			  return null;
+
+		  if(lFound != -1) {
+			  SkipListEntry nodeFound = succs[lFound];
+			  if(r.nextDouble() < 0.1) {
+				  int topLayer = nodeFound.topLayer + 1;
+				  if(topLayer < MAXHEIGHT) {
+					  preds[topLayer].nexts[topLayer] = nodeFound;
+					  nodeFound.nexts[topLayer] = succs[topLayer];
+					  nodeFound.topLayer = topLayer;
+				  }
+			  }
+			  return nodeFound.value;
+		  }
+
+		  return null;
+	  } finally {
+		  mutex.unlock();
+	  }
 	}
   
-  synchronized boolean add(String k, Integer value) {
-  		int topLayer = randomLevel(maxHeight());
-		SkipListEntry[] preds = new SkipListEntry[maxHeight()];
-		SkipListEntry[] succs = new SkipListEntry[maxHeight()];
-		
-		int lFound = findNode(k, preds, succs);
-		if(lFound != -1) {
-			SkipListEntry nodeFound = succs[lFound];
-			nodeFound.value = value;
-			return true;
-		}
-		SkipListEntry pred, succ;
-		boolean valid = true;
-		for(int layer = 0; valid && (layer <= topLayer); layer++){
-			pred = preds[layer];
-			succ = succs[layer];
-			valid = pred.nexts[layer] == succ;
-		}
-		
-		SkipListEntry newNode = new SkipListEntry(k, value, topLayer);
-		for(int layer = 0; layer <= topLayer; layer++){
-			newNode.nexts[layer] = succs[layer];
-			preds[layer].nexts[layer] = newNode;
-		}
-		return true;
+  public boolean add(String k, Integer value) {
+	  mutex.lock();
+	  try {
+		  int topLayer = randomLevel(maxHeight());
+		  SkipListEntry[] preds = new SkipListEntry[maxHeight()];
+		  SkipListEntry[] succs = new SkipListEntry[maxHeight()];
+
+		  int lFound = findNode(k, preds, succs);
+		  if(lFound != -1) {
+			  SkipListEntry nodeFound = succs[lFound];
+			  nodeFound.value = value;
+			  return true;
+		  }
+		  SkipListEntry pred, succ;
+		  boolean valid = true;
+		  for(int layer = 0; valid && (layer <= topLayer); layer++){
+			  pred = preds[layer];
+			  succ = succs[layer];
+			  valid = pred.nexts[layer] == succ;
+		  }
+
+		  SkipListEntry newNode = new SkipListEntry(k, value, topLayer);
+		  for(int layer = 0; layer <= topLayer; layer++){
+			  newNode.nexts[layer] = succs[layer];
+			  preds[layer].nexts[layer] = newNode;
+		  }
+		  return true;
+	  } finally {
+		  mutex.unlock();
+	  }
 	}
 	
-	synchronized boolean remove(String k) {
-		SkipListEntry nodeToDelete = null;
-		int topLayer = -1;
-		SkipListEntry[] preds = new SkipListEntry[maxHeight()];
-		SkipListEntry[] succs = new SkipListEntry[maxHeight()];
-		
-		int lFound = findNode(k, preds, succs);
-		if (lFound != -1) {
-			nodeToDelete = succs[lFound];
-			topLayer = nodeToDelete.topLayer;				
-			SkipListEntry pred, succ;
-			boolean valid = true;
-			for(int layer = 0; valid && (layer <= topLayer); layer ++){
-				pred = preds[layer];
-				succ = succs[layer];
-				valid = pred.nexts[layer] == succ;
-			}					
-			for(int layer = topLayer; layer >= 0; layer--){
-				preds[layer].nexts[layer] = nodeToDelete.nexts[layer];
+	public boolean remove(String k) {
+		mutex.lock();
+		try {
+			SkipListEntry nodeToDelete = null;
+			int topLayer = -1;
+			SkipListEntry[] preds = new SkipListEntry[maxHeight()];
+			SkipListEntry[] succs = new SkipListEntry[maxHeight()];
+
+			int lFound = findNode(k, preds, succs);
+			if (lFound != -1) {
+				nodeToDelete = succs[lFound];
+				topLayer = nodeToDelete.topLayer;
+				SkipListEntry pred, succ;
+				boolean valid = true;
+				for(int layer = 0; valid && (layer <= topLayer); layer ++){
+					pred = preds[layer];
+					succ = succs[layer];
+					valid = pred.nexts[layer] == succ;
+				}
+				for(int layer = topLayer; layer >= 0; layer--){
+					preds[layer].nexts[layer] = nodeToDelete.nexts[layer];
+				}
+				return true;
+			} else {
+				return false;
 			}
-			return true;
-		} else {
-			return false;
+		} finally {
+			mutex.unlock();
 		}
 	}
 					

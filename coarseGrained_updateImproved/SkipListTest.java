@@ -1,8 +1,11 @@
 package coarseGrained_updateImproved;
 
-import static org.junit.Assert.*;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class SkipListTest {
     @org.junit.Test
@@ -90,118 +93,119 @@ public class SkipListTest {
 				assertTrue(r2.passed);
 				assertTrue(r3.passed);
     }
-    
-}
 
-class RandPutAndGet implements Runnable {
 
-	SkipList sl;
-	public boolean passed;
-	
-	public RandPutAndGet(SkipList sl){
-		this.sl = sl;
-		this.passed = true;
-	}
-	
-	@Override
-	public void run() {
-		Random r = new Random();
-		ConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<>();
-		
-		int putN = r.nextInt(1000);
-		int getN = r.nextInt(1000);
-		
-		ArrayList<String> names = new ArrayList<>();
-		for(int i = 0; i < putN; i ++) {
-			String name = Integer.toString(i);
-			names.add(name);
-			sl.add(name, i);
-			map.put(name, i);
+	static class RandPutAndGet implements Runnable {
+
+		SkipList sl;
+		public boolean passed;
+
+		public RandPutAndGet(SkipList sl){
+			this.sl = sl;
+			this.passed = true;
 		}
-		
-		for(int i = 0; i < getN; i ++) {
-			int rand = r.nextInt(putN);
-			int a = sl.get(names.get(rand));
-			int b = map.get(names.get(rand));
-			
-			if(a != b) {
-				passed = false;
-				return;
+
+		@Override
+		public void run() {
+			Random r = new Random();
+			ConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<>();
+
+			int putN = r.nextInt(1000);
+			int getN = r.nextInt(1000);
+
+			ArrayList<String> names = new ArrayList<>();
+			for(int i = 0; i < putN; i ++) {
+				String name = Integer.toString(i);
+				names.add(name);
+				sl.add(name, i);
+				map.put(name, i);
+			}
+
+			for(int i = 0; i < getN; i ++) {
+				int rand = r.nextInt(putN);
+				int a = sl.get(names.get(rand));
+				int b = map.get(names.get(rand));
+
+				if(a != b) {
+					passed = false;
+					return;
+				}
 			}
 		}
 	}
-}
 
-class RandPutGetRemove implements Runnable {
+	static class RandPutGetRemove implements Runnable {
 
-	SkipList sl;
-	public boolean passed;
-	ConcurrentHashMap<String, Integer> removed;
-	
-	public RandPutGetRemove(SkipList sl, ConcurrentHashMap<String, Integer> removed){
-		this.sl = sl;
-		this.passed = true;
-		this.removed = removed;
-	}
-	
-	@Override
-	public void run() {
-		Random r = new Random();
-		ConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<>();
-		
-		int putN = r.nextInt(1000);
-		int getN = r.nextInt(1000);
-		int removeN = r.nextInt(putN);
-		
-		ArrayList<String> names = new ArrayList<>();
-		for(int i = 0; i < putN; i ++) {
-			String name = Integer.toString(i);
-			names.add(name);
-			sl.add(name, i);
-			map.put(name, i);
+		SkipList sl;
+		public boolean passed;
+		ConcurrentHashMap<String, Integer> removed;
+
+		public RandPutGetRemove(SkipList sl, ConcurrentHashMap<String, Integer> removed){
+			this.sl = sl;
+			this.passed = true;
+			this.removed = removed;
 		}
-		
-		try{
-			Thread.sleep(1000);
-		} catch (Exception e){
-			e.printStackTrace();
-		}
-		
-		for(int i = 0; i < removeN; i ++) {
-			int rand = r.nextInt(putN);
-			sl.remove(names.get(rand));
-			map.remove(names.get(rand));
-			removed.put(names.get(rand), 0);
-		}
-		
-		for(int i = 0; i < getN; i ++) {
-			int rand = r.nextInt(putN);
-			Integer a = sl.get(names.get(rand));
-			Integer b = map.get(names.get(rand));
-			System.out.println(a + " " + b);
-			
-			
-			
-			if(a == null || b == null){
-				if(a == null && b == null){
-					continue;
-				}
-				else {
-					if(a == null) {
-						if (removed.containsKey(b.toString())) {
-							continue;
-						} else {
-							passed = false;
-							return;
+
+		@Override
+		public void run() {
+			Random r = new Random();
+			ConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<>();
+
+			int putN = r.nextInt(1000);
+			int getN = r.nextInt(1000);
+			int removeN = r.nextInt(putN);
+
+			ArrayList<String> names = new ArrayList<>();
+			for(int i = 0; i < putN; i ++) {
+				String name = Integer.toString(i);
+				names.add(name);
+				sl.add(name, i);
+				map.put(name, i);
+			}
+
+			try{
+				Thread.sleep(1000);
+			} catch (Exception e){
+				e.printStackTrace();
+			}
+
+			for(int i = 0; i < removeN; i ++) {
+				int rand = r.nextInt(putN);
+				sl.remove(names.get(rand));
+				map.remove(names.get(rand));
+				removed.put(names.get(rand), 0);
+			}
+
+			for(int i = 0; i < getN; i ++) {
+				int rand = r.nextInt(putN);
+				Integer a = sl.get(names.get(rand));
+				Integer b = map.get(names.get(rand));
+				System.out.println(a + " " + b);
+
+
+
+				if(a == null || b == null){
+					if(a == null && b == null){
+						continue;
+					}
+					else {
+						if(a == null) {
+							if (removed.containsKey(b.toString())) {
+								continue;
+							} else {
+								passed = false;
+								return;
+							}
 						}
 					}
 				}
-			}
-			
-			if(!a.equals(b)) {
-				passed = false;
-				return;
+
+				if(!a.equals(b)) {
+					passed = false;
+					return;
+				}
 			}
 		}
 	}
+
 }
