@@ -64,7 +64,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	path := fmt.Sprintf("/data/%s/%s/ops/%s", ts, a, ops)
-	if err := tmpl.Execute(w, struct{ Path string }{path}); err != nil {
+	if err := tmpl.Execute(w, struct {
+		Path string
+		TS   string
+	}{path, ts}); err != nil {
 		log.Println(err)
 	}
 }

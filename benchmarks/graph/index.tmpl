@@ -3,13 +3,13 @@
 <style>
 
 .axis--x path {
-  display: none;
+  /*display: none;*/
 }
 
 .line {
   fill: none;
   stroke: steelblue;
-  stroke-width: 1.5px;
+  stroke-width: 4px;
 }
 
 </style>
@@ -23,7 +23,7 @@ var svg = d3.select("svg"),
     height = svg.attr("height") - margin.top - margin.bottom,
     g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-var x = d3.scaleLinear().range([0, width]),
+var x = d3.scaleLog().range([0, width]),
     y = d3.scaleLinear().range([height, 0]),
     z = d3.scaleOrdinal(d3.schemeCategory10);
 
@@ -56,26 +56,28 @@ d3.tsv("{{.Path}}/data.tsv", type, function(error, data) {
   g.append("g")
       .attr("class", "axis axis--x")
       .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x))
+      .call(d3.axisBottom(x).tickValues([1,2,5,10,20,50,80,100]).tickFormat(d3.format(",.0f")))
+      .style("font", "25px sans-serif")
     .append("text")
-      .attr("x", 25)
-      .attr("dy", "2em")
+      .attr("x", width)
+      .attr("dy", "-0.5em")
       .attr("fill", "#000")
-      .style("font", "12px sans-serif")
+      .style("font", "25px sans-serif")
       .text("Threads");
 
 
   g.append("g")
       .attr("class", "axis axis--y")
-      .style("font", "12px sans-serif")
+      .style("font", "25px sans-serif")
       .call(d3.axisLeft(y))
+      .style("font", "25px sans-serif")
     .append("text")
       .attr("transform", "rotate(-90)")
       .attr("y", 6)
       .attr("dy", "0.71em")
       .attr("fill", "#000")
-      .style("font", "12px sans-serif")
-      .text("Time, ns");
+      .style("font", "25px sans-serif")
+      .text("Time, ms");
 
   var algo = g.selectAll(".algo")
     .data(algos)
@@ -92,14 +94,15 @@ d3.tsv("{{.Path}}/data.tsv", type, function(error, data) {
       .attr("transform", function(d) { return "translate(" + x(d.value.threads) + "," + y(d.value.time) + ")"; })
       .attr("x", 3)
       .attr("dy", "0.35em")
-      .style("font", "12px sans-serif")
+      .style("font", "0px sans-serif")
       .text(function(d) { return d.id; });
 });
 
 function type(d, _, columns) {
   d.threads = parseInt(d.threads, 10);
-  for (var i = 1, n = columns.length, c; i < n; ++i) d[c = columns[i]] = +d[c];
+  for (var i = 1, n = columns.length, c; i < n; ++i) d[c = columns[i]] = +d[c]/(1E6);
   return d;
 }
 
 </script>
+<p>{{.TS}}</p>

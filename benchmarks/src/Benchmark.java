@@ -22,25 +22,25 @@ public class Benchmark {
 
         c = new ArrayList<>();
         contexts.put(10, c);
-        c.add(new Context(1, 1)); // change averages to: 1000, 1000, 1000, 1000
-        c.add(new Context(10, 1));
-        c.add(new Context(100, 1));
-        c.add(new Context(1000, 1));
+        c.add(new Context(1, 5)); // change averages to: 1000, 1000, 1000, 1000
+        c.add(new Context(10, 5));
+        c.add(new Context(100, 5));
+//        c.add(new Context(1000, 100));
 
         c = new ArrayList<>();
         contexts.put(100, c);
-        c.add(new Context(1, 1)); // change averages to: 1000, 1000, 100, 10
-        c.add(new Context(10, 1));
-        c.add(new Context(100, 1));
-        c.add(new Context(1000, 1));
+        c.add(new Context(1, 5)); // change averages to: 1000, 1000, 100, 10
+        c.add(new Context(10, 5));
+        c.add(new Context(100, 5));
+//        c.add(new Context(1000, 100));
 
-//        c = new ArrayList<>();
-//        contexts.put(1000, c);
-//        c.add(new Context(1, 1)); // 100, 100, 100, 10
-//        c.add(new Context(10, 1));
-//        c.add(new Context(100, 1)); // works: 84 seconds for lockfree2
+        c = new ArrayList<>();
+        contexts.put(1000, c);
+        c.add(new Context(1, 5)); // 100, 100, 100, 10
+        c.add(new Context(10, 5));
+        c.add(new Context(100, 5)); // works: 84 seconds for lockfree2
 //        c.add(new Context(1000, 1)); // works: 49 seconds for lockfree2
-//
+
 //        c = new ArrayList<>();
 //        contexts.put(10000, c);
 //        c.add(new Context(1, 1)); // 100, 100, 100, 10
@@ -58,7 +58,7 @@ public class Benchmark {
         ret.put("fine0", new fineGrained.SkipList());
         ret.put("fine1", new fineGrainedImproved.SkipList());
         ret.put("lockfree0", new lockFree.SkipList());
-        ret.put("lockfree1", new lockFreeImproved.SkipList());
+//        ret.put("lockfree1", new lockFreeImproved.SkipList());
 
         return ret;
     }
@@ -67,9 +67,7 @@ public class Benchmark {
         setupContexts();
 
         runAll(Args.Random, "random");
-
-        // TODO: Gets stuck.
-        // runAll(Args.SameGet, "same_get");
+//         runAll(Args.SameGet, "same_get");
     }
 
     static void runAll(Args argType, String dirname) {
@@ -87,6 +85,8 @@ public class Benchmark {
                 Instance inst = new Instance(numOps, c.numThreads, c.averageOver, argType);
                 rows.put(c.numThreads, inst.runAll());
             }
+
+            System.out.println("writing tsv " + (new Integer(numOps)).toString());
 
             writeTsv(dirPrefix, numOps, rows);
         }
@@ -152,14 +152,17 @@ public class Benchmark {
      */
     static class RandomKey implements NextKey {
         private final Random random;
+        private int nThreads;
 
-        public RandomKey(Random random) {
+        public RandomKey(Random random, int nThreads) {
             this.random = random;
+            this.nThreads = nThreads;
         }
 
         @Override
         public String nextKey() {
-            return Integer.toString(this.random.nextInt());
+            int a = (int) Math.floor(this.nThreads/10) + 1;
+            return Integer.toString(this.random.nextInt(a));
         }
     }
 
@@ -183,20 +186,29 @@ public class Benchmark {
      * nextKey returns the same key most of the time.
      */
     static class SameGetKey implements NextKey {
+        public static String SAME_KEY = "42";
         private final Random random, priv;
+        private int nThreads;
 
-        public SameGetKey(Random random) {
+        public SameGetKey(Random random, int nThreads) {
             this.random = random;
             this.priv = new Random();
+            this.nThreads = nThreads;
         }
 
         @Override
         public String nextKey() {
             double r = this.priv.nextDouble();
             if (r <= 0.5) {
-                return "42";
+                return SAME_KEY;
             } else {
-                return Integer.toString(this.random.nextInt());
+                while (true) {
+                    int a = (int) Math.floor(this.nThreads/10) + 1;
+                    if (a == 42) {
+                        continue;
+                    }
+                    return Integer.toString(this.random.nextInt(a));
+                }
             }
         }
     }
@@ -264,10 +276,10 @@ public class Benchmark {
                 NextKey nk = null;
                 switch (this.argType) {
                     case Random:
-                        nk = new RandomKey(r);
+                        nk = new RandomKey(r, this.numThreads);
                         break;
                     case SameGet:
-                        nk = new SameGetKey(r);
+                        nk = new SameGetKey(r, this.numThreads);
                         break;
                     default:
                         throw new Error("unhandled arg type");
@@ -313,13 +325,17 @@ public class Benchmark {
 
                 List<Long> times = new ArrayList<>();
                 for (int i = 0; i < this.averageOver; i++) {
+                    if (this.argType == Args.SameGet) {
+                        s.add(SameGetKey.SAME_KEY, 0); // Value does not matter.
+                    }
+
                     long t = runOne(s);
-                    System.out.println(t);
+//                    System.out.println(t);
                     times.add(t);
                 }
 
                 double avgTime = average(times);
-                System.out.println("DONE " + avgTime);
+                System.out.println("DONE " + avgTime + " " + algo + " ");
                 ret.put(algo, avgTime);
             }
 
@@ -344,12 +360,12 @@ class WeightedOp {
     public Op next() {
         double value = random.nextDouble();
 
-        if (value < 0.9) {
-            return Op.Get;
-        } else if (value < 0.99) {
+        if (value < 0.5) {
             return Op.Add;
-        } else {
+        } else if (value < 1.0) {
             return Op.Remove;
+        } else {
+            throw new Error("not reached");
         }
     }
 }
