@@ -7,30 +7,30 @@ public final class SkipList implements SkipListInterface.SkipListInterface {
 	public static final int MAX_LEVEL = 32 - 1;
 	final SkipListEntry head = new SkipListEntry("! -oo");
 	final SkipListEntry tail = new SkipListEntry("~ +oo");
-	
+
 	Random r = new Random();
-	
+
 	int randomLevel() {
 		int i = 0;
-		while(r.nextDouble() < 0.5){
+		while(r.nextDouble() < 0.5) {
 			i ++;
 		}
-		
+
 		return i;
 	}
 	public SkipList() {
 		for (int i = 0; i < head.next.length; i++) {
 			head.next[i]
-			= new AtomicMarkableReference<SkipListEntry>(tail, false);
+			    = new AtomicMarkableReference<SkipListEntry>(tail, false);
 		}
 	}
-	
+
 	public boolean add(String key, Integer value) {
 		int topLevel = randomLevel();
 		int bottomLevel = 0;
 		SkipListEntry[] preds = (SkipListEntry[]) new SkipListEntry[MAX_LEVEL + 1];
 		SkipListEntry[] succs = (SkipListEntry[]) new SkipListEntry[MAX_LEVEL + 1];
-		
+
 		while (true) {
 			boolean found = find(key, preds, succs);
 			if (found) {
@@ -42,14 +42,14 @@ public final class SkipList implements SkipListInterface.SkipListInterface {
 					SkipListEntry succ = succs[level];
 					newSkipListEntry.next[level].set(succ, false);
 				}
-				
+
 				SkipListEntry pred = preds[bottomLevel];
 				SkipListEntry succ = succs[bottomLevel];
 				newSkipListEntry.next[bottomLevel].set(succ, false);
 				if (!pred.next[bottomLevel].compareAndSet(succ, newSkipListEntry, false, false)) {
 					continue;
 				}
-				
+
 				for (int level = bottomLevel+1; level <= topLevel; level++) {
 					while (true) {
 						pred = preds[level];
@@ -63,20 +63,20 @@ public final class SkipList implements SkipListInterface.SkipListInterface {
 			}
 		}
 	}
-	
+
 	public boolean remove(String key) {
 		int bottomLevel = 0;
 		SkipListEntry[] preds = (SkipListEntry[]) new SkipListEntry[MAX_LEVEL + 1];
 		SkipListEntry[] succs = (SkipListEntry[]) new SkipListEntry[MAX_LEVEL + 1];
 		SkipListEntry succ;
-		
+
 		while (true) {
 			boolean found = find(key, preds, succs);
 			if (!found) {
 				return false;
 			} else {
 				SkipListEntry nodeToRemove = succs[bottomLevel];
-				
+
 				for (int level = nodeToRemove.topLevel; level >= bottomLevel+1; level--) {
 					boolean[] marked = {false};
 					succ = nodeToRemove.next[level].get(marked);
@@ -85,55 +85,55 @@ public final class SkipList implements SkipListInterface.SkipListInterface {
 						succ = nodeToRemove.next[level].get(marked);
 					}
 				}
-				
+
 				boolean[] marked = {false};
 				succ = nodeToRemove.next[bottomLevel].get(marked);
 				while (true) {
 					boolean iMarkedIt =
-										nodeToRemove.next[bottomLevel].compareAndSet(succ, succ, false, true);
-										
+					    nodeToRemove.next[bottomLevel].compareAndSet(succ, succ, false, true);
+
 					succ = succs[bottomLevel].next[bottomLevel].get(marked);
 					if (iMarkedIt) {
 						find(key, preds, succs);
 						return true;
-					}
-					else if (marked[0]) return false;
+					} else if (marked[0]) return false;
 				}
 			}
 		}
 	}
-	
+
 	boolean find(String key, SkipListEntry[] preds, SkipListEntry[] succs) {
 		int bottomLevel = 0;
 		boolean[] marked = {false};
 		boolean snip;
 		SkipListEntry pred = null, curr = null, succ = null;
 		retry:
-			while (true) {
-				pred = head;
-				for (int level = MAX_LEVEL; level >= bottomLevel; level--) {
-					curr = pred.next[level].getReference();
-					while (true) {
+		while (true) {
+			pred = head;
+			for (int level = MAX_LEVEL; level >= bottomLevel; level--) {
+				curr = pred.next[level].getReference();
+				while (true) {
+					succ = curr.next[level].get(marked);
+					while (marked[0]) {
+						snip = pred.next[level].compareAndSet(curr, succ, false, false);
+						if (!snip) continue retry;
+						curr = pred.next[level].getReference();
 						succ = curr.next[level].get(marked);
-						while (marked[0]) {
-							snip = pred.next[level].compareAndSet(curr, succ, false, false);
-							if (!snip) continue retry;
-							curr = pred.next[level].getReference();
-							succ = curr.next[level].get(marked);
-						}
-						if (curr.key.compareTo(key) < 0){
-							pred = curr; curr = succ;
-						} else {
-							break;
-						}
 					}
-					preds[level] = pred;
-					succs[level] = curr;
+					if (curr.key.compareTo(key) < 0) {
+						pred = curr;
+						curr = succ;
+					} else {
+						break;
+					}
 				}
-				return (curr.key.equals(key));
+				preds[level] = pred;
+				succs[level] = curr;
 			}
+			return (curr.key.equals(key));
+		}
 	}
-	
+
 	public Integer get(String key) {
 		if(r.nextDouble() < 0.1) {
 			return getWithAdd(key);
@@ -141,7 +141,7 @@ public final class SkipList implements SkipListInterface.SkipListInterface {
 			return getWithoutAdd(key);
 		}
 	}
-	
+
 	Integer getWithoutAdd(String key) {
 		int bottomLevel = 0;
 		boolean[] marked = {false};
@@ -154,7 +154,7 @@ public final class SkipList implements SkipListInterface.SkipListInterface {
 					curr = pred.next[level].getReference();
 					succ = curr.next[level].get(marked);
 				}
-				if (curr.key.compareTo(key) < 0){
+				if (curr.key.compareTo(key) < 0) {
 					pred = curr;
 					curr = succ;
 				} else {
@@ -180,14 +180,14 @@ public final class SkipList implements SkipListInterface.SkipListInterface {
 		} else {
 			SkipListEntry nodeFound = succs[0];
 			int topLevel = nodeFound.topLevel + 1; // new top level
-			
+
 			if(topLevel > MAX_LEVEL)
 				return nodeFound.value;
-			
+
 			SkipListEntry pred;
 			SkipListEntry succ = succs[topLevel];
 			nodeFound.next[topLevel].set(succ, false);
-			
+
 			while (true) {
 				pred = preds[topLevel];
 				succ = succs[topLevel];
@@ -200,5 +200,5 @@ public final class SkipList implements SkipListInterface.SkipListInterface {
 		}
 	}
 }
-	
-	
+
+
