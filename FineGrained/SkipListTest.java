@@ -1,4 +1,4 @@
-package fineGrained;
+package FineGrained;
 
 import java.util.ArrayList;
 import java.util.Random;

@@ -1,4 +1,4 @@
-package fineGrainedImproved;
+package FineGrainedImproved;
 
 /*
  * Copied from: http://www.mathcs.emory.edu/~cheung/Courses/323/Syllabus/Map/skip-list-impl.html
@@ -7,7 +7,7 @@ package fineGrainedImproved;
 import java.util.*;
 
 
-public class SkipList implements skipListInterface.SkipListInterface
+public class SkipList implements SkipListInterface.SkipListInterface
 {
 
 	public static final int MAXHEIGHT = 32;

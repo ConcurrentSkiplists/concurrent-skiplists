@@ -1,11 +1,11 @@
 language: java
 env:
-  - TEST_DIR=coarseGrained_updateImproved
-  - TEST_DIR=coarseGrained_updated
-  - TEST_DIR=fineGrained
-  - TEST_DIR=fineGrainedImproved
-  - TEST_DIR=lockFree
-  - TEST_DIR=lockFreeImproved
+  - TEST_DIR=CoarseGrainedImproved
+  - TEST_DIR=CoarseGrained
+  - TEST_DIR=FineGrained
+  - TEST_DIR=FineGrainedImproved
+  - TEST_DIR=LockFree
+  - TEST_DIR=LockFreeImproved
 before_install: true
 install: true
 before_build:

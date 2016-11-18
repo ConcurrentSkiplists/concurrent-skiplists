@@ -1,4 +1,4 @@
-package coarseGrained_updateImproved;
+package CoarseGrainedImproved;
 
 import java.util.*;
 import java.util.concurrent.*;

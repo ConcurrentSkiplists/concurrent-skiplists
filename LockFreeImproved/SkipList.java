@@ -1,9 +1,9 @@
-package lockFreeImproved;
+package LockFreeImproved;
 
 import java.util.*;
 import java.util.concurrent.atomic.*;
 
-public final class SkipList implements skipListInterface.SkipListInterface {
+public final class SkipList implements SkipListInterface.SkipListInterface {
 	public static final int MAX_LEVEL = 32 - 1;
 	final SkipListEntry head = new SkipListEntry("! -oo");
 	final SkipListEntry tail = new SkipListEntry("~ +oo");

@@ -1,9 +1,9 @@
-package standardLibrary;
+package StandardLibrary;
 
 import java.util.*;
 import java.util.concurrent.*;
 
-public final class SkipList implements skipListInterface.SkipListInterface {
+public final class SkipList implements SkipListInterface.SkipListInterface {
 	ConcurrentSkipListMap<String, Integer> map = new ConcurrentSkipListMap<>();
 	public SkipList() {
 	}

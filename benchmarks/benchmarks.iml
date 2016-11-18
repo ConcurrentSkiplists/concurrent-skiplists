@@ -2,35 +2,32 @@
 <module type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
+    <content url="file://$MODULE_DIR$/../CoarseGrained">
+      <sourceFolder url="file://$MODULE_DIR$/../CoarseGrained" isTestSource="false" packagePrefix="CoarseGrained" />
+    </content>
+    <content url="file://$MODULE_DIR$/../CoarseGrainedImproved">
+      <sourceFolder url="file://$MODULE_DIR$/../CoarseGrainedImproved" isTestSource="false" packagePrefix="CoarseGrainedImproved" />
+    </content>
+    <content url="file://$MODULE_DIR$/../FineGrained">
+      <sourceFolder url="file://$MODULE_DIR$/../FineGrained" isTestSource="false" packagePrefix="FineGrained" />
+    </content>
+    <content url="file://$MODULE_DIR$/../FineGrainedImproved">
+      <sourceFolder url="file://$MODULE_DIR$/../FineGrainedImproved" isTestSource="false" packagePrefix="FineGrainedImproved" />
+    </content>
+    <content url="file://$MODULE_DIR$/../LockFree">
+      <sourceFolder url="file://$MODULE_DIR$/../LockFree" isTestSource="false" packagePrefix="LockFree" />
+    </content>
+    <content url="file://$MODULE_DIR$/../LockFreeImproved">
+      <sourceFolder url="file://$MODULE_DIR$/../LockFreeImproved" isTestSource="false" packagePrefix="LockFreeImproved" />
+    </content>
+    <content url="file://$MODULE_DIR$/../SkipListInterface">
+      <sourceFolder url="file://$MODULE_DIR$/../SkipListInterface" isTestSource="false" packagePrefix="SkipListInterface" />
+    </content>
+    <content url="file://$MODULE_DIR$/../StandardLibrary">
+      <sourceFolder url="file://$MODULE_DIR$/../StandardLibrary" isTestSource="false" packagePrefix="StandardLibrary" />
+    </content>
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
-    </content>
-    <content url="file://$MODULE_DIR$/../coarseGrained">
-      <sourceFolder url="file://$MODULE_DIR$/../coarseGrained" isTestSource="false" packagePrefix="coarseGrained" />
-    </content>
-    <content url="file://$MODULE_DIR$/../coarseGrained_updateImproved">
-      <sourceFolder url="file://$MODULE_DIR$/../coarseGrained_updateImproved" isTestSource="false" packagePrefix="coarseGrained_updateImproved" />
-    </content>
-    <content url="file://$MODULE_DIR$/../coarseGrained_updated">
-      <sourceFolder url="file://$MODULE_DIR$/../coarseGrained_updated" isTestSource="false" packagePrefix="coarseGrained_updated" />
-    </content>
-    <content url="file://$MODULE_DIR$/../fineGrained">
-      <sourceFolder url="file://$MODULE_DIR$/../fineGrained" isTestSource="false" packagePrefix="fineGrained" />
-    </content>
-    <content url="file://$MODULE_DIR$/../fineGrainedImproved">
-      <sourceFolder url="file://$MODULE_DIR$/../fineGrainedImproved" isTestSource="false" packagePrefix="fineGrainedImproved" />
-    </content>
-    <content url="file://$MODULE_DIR$/../lockFree">
-      <sourceFolder url="file://$MODULE_DIR$/../lockFree" isTestSource="false" packagePrefix="lockFree" />
-    </content>
-    <content url="file://$MODULE_DIR$/../lockFreeImproved">
-      <sourceFolder url="file://$MODULE_DIR$/../lockFreeImproved" isTestSource="false" packagePrefix="lockFreeImproved" />
-    </content>
-    <content url="file://$MODULE_DIR$/../skipListInterface">
-      <sourceFolder url="file://$MODULE_DIR$/../skipListInterface" isTestSource="false" packagePrefix="skipListInterface" />
-    </content>
-    <content url="file://$MODULE_DIR$/../standardLibrary">
-      <sourceFolder url="file://$MODULE_DIR$/../standardLibrary" isTestSource="false" packagePrefix="standardLibrary" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

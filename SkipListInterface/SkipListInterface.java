@@ -1,4 +1,4 @@
-package skipListInterface;
+package SkipListInterface;
 
 public interface SkipListInterface {
     Integer get(String k);

@@ -1,4 +1,4 @@
-package coarseGrained_updateImproved;
+package CoarseGrainedImproved;
 
 import java.util.ArrayList;
 import java.util.Random;

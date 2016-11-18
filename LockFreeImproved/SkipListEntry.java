@@ -1,4 +1,4 @@
-package lockFreeImproved;
+package LockFreeImproved;
 
 import java.util.*;
 import java.util.concurrent.atomic.*;

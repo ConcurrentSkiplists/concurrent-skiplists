@@ -1,5 +1,3 @@
-import skipListInterface.SkipListInterface;
-
 import java.io.*;
 import java.util.*;
 
@@ -25,40 +23,44 @@ public class Benchmark {
         c.add(new Context(1, 5)); // change averages to: 1000, 1000, 1000, 1000
         c.add(new Context(10, 5));
         c.add(new Context(100, 5));
-//        c.add(new Context(1000, 100));
 
+        /* Comment out to run other benchmarks.
+           10000 ops takes long time to run.
+         */
+
+        /*
         c = new ArrayList<>();
         contexts.put(100, c);
         c.add(new Context(1, 5)); // change averages to: 1000, 1000, 100, 10
         c.add(new Context(10, 5));
         c.add(new Context(100, 5));
-//        c.add(new Context(1000, 100));
 
         c = new ArrayList<>();
         contexts.put(1000, c);
         c.add(new Context(1, 5)); // 100, 100, 100, 10
         c.add(new Context(10, 5));
-        c.add(new Context(100, 5)); // works: 84 seconds for lockfree2
-//        c.add(new Context(1000, 1)); // works: 49 seconds for lockfree2
+        c.add(new Context(100, 5));
 
-//        c = new ArrayList<>();
-//        contexts.put(10000, c);
-//        c.add(new Context(1, 1)); // 100, 100, 100, 10
-//        c.add(new Context(10, 1));
-//        c.add(new Context(100, 1));
-//        c.add(new Context(1000, 1)); // 8 minutes for one standard / 4 minutes for one lockfree (80 minutes for 10; 400+ or 200+ for total)
+        c = new ArrayList<>();
+        contexts.put(10000, c);
+        c.add(new Context(1, 1)); // 100, 100, 100, 10
+        c.add(new Context(10, 1));
+        c.add(new Context(100, 1));
+        */
     }
 
-    static TreeMap<String, skipListInterface.SkipListInterface> newSkipLists() {
-        TreeMap<String, SkipListInterface> ret = new TreeMap<>();
+    static TreeMap<String, SkipListInterface.SkipListInterface> newSkipLists() {
+        TreeMap<String, SkipListInterface.SkipListInterface> ret = new TreeMap<>();
 
-        ret.put("standard", new standardLibrary.SkipList());
-        ret.put("coarse0", new coarseGrained_updated.SkipList());
-        ret.put("coarse1", new coarseGrained_updateImproved.SkipList());
-        ret.put("fine0", new fineGrained.SkipList());
-        ret.put("fine1", new fineGrainedImproved.SkipList());
-        ret.put("lockfree0", new lockFree.SkipList());
-//        ret.put("lockfree1", new lockFreeImproved.SkipList());
+        ret.put("standard", new StandardLibrary.SkipList());
+        ret.put("coarse0", new CoarseGrained.SkipList());
+
+        // Skip (not needed)
+        // ret.put("coarse1", new CoarseGrainedImproved.SkipList());
+
+        ret.put("fine0", new FineGrained.SkipList());
+        ret.put("fine1", new FineGrainedImproved.SkipList());
+        ret.put("lockfree0", new LockFree.SkipList());
 
         return ret;
     }
@@ -67,7 +69,7 @@ public class Benchmark {
         setupContexts();
 
         runAll(Args.Random, "random");
-//         runAll(Args.SameGet, "same_get");
+        runAll(Args.SameGet, "same_get");
     }
 
     static void runAll(Args argType, String dirname) {
@@ -214,13 +216,13 @@ public class Benchmark {
     }
 
     static class Runner implements Runnable {
-        skipListInterface.SkipListInterface s;
+        SkipListInterface.SkipListInterface s;
         int numOps;
         WeightedOp wop;
         NextKey nk;
         NextValue nv;
 
-        public Runner(skipListInterface.SkipListInterface s, int numOps, NextKey nk, NextValue nv) {
+        public Runner(SkipListInterface.SkipListInterface s, int numOps, NextKey nk, NextValue nv) {
             this.s = s;
             this.numOps = numOps;
             this.wop = new WeightedOp(new Random(System.nanoTime()));
@@ -268,7 +270,7 @@ public class Benchmark {
             this.argType = argType;
         }
 
-        long runOne(skipListInterface.SkipListInterface s) {
+        long runOne(SkipListInterface.SkipListInterface s) {
             List<Thread> threads = new ArrayList<>();
 
             for (int i = 0; i < this.numThreads; i++) {
@@ -316,12 +318,12 @@ public class Benchmark {
          * @return TreeMap<algo,time>
          */
         TreeMap<String, Double> runAll() {
-            TreeMap<String, skipListInterface.SkipListInterface> tm = newSkipLists();
+            TreeMap<String, SkipListInterface.SkipListInterface> tm = newSkipLists();
             TreeMap<String, Double> ret = new TreeMap<>();
 
-            for (Map.Entry<String, skipListInterface.SkipListInterface> e : tm.entrySet()) {
+            for (Map.Entry<String, SkipListInterface.SkipListInterface> e : tm.entrySet()) {
                 String algo = e.getKey();
-                skipListInterface.SkipListInterface s = e.getValue();
+                SkipListInterface.SkipListInterface s = e.getValue();
 
                 List<Long> times = new ArrayList<>();
                 for (int i = 0; i < this.averageOver; i++) {
@@ -330,7 +332,6 @@ public class Benchmark {
                     }
 
                     long t = runOne(s);
-//                    System.out.println(t);
                     times.add(t);
                 }
 

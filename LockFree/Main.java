@@ -1,4 +1,4 @@
-package lockFree;
+package LockFree;
 
 import java.util.*;
 import java.util.concurrent.*;
