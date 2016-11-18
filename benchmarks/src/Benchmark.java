@@ -68,12 +68,13 @@ public class Benchmark {
 	public static void main(String args[]) {
 		setupContexts();
 
-		runAll(Args.Random, "random");
-		runAll(Args.SameGet, "same_get");
+		long unixTime = System.currentTimeMillis() / 1000L;
+
+		runAll(Args.Random, "random", unixTime);
+		runAll(Args.SameGet, "same_get", unixTime);
 	}
 
-	static void runAll(Args argType, String dirname) {
-		long unixTime = System.currentTimeMillis() / 1000L;
+	static void runAll(Args argType, String dirname, long unixTime) {
 		String dirPrefix = String.format("data/%d/%s/ops", unixTime, dirname);
 		File fdir = new File(dirPrefix);
 		fdir.mkdirs();
