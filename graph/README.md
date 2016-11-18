@@ -3,13 +3,13 @@
 ## Usage
 
 ```
-go run serve.go -data ../data -http :8000 &
+go run serve.go -data ../benchmarks/data -http :8000
 ```
 
 ## Request parameters
 
 ```
-timestamp     [latest|1234578...]
+timestamp     [latest|<unix-timestamp>...]
 ops           [10|100...]
 args          [random|same_get]
 ```
