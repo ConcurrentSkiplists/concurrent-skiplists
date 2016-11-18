@@ -6,7 +6,7 @@ Compare fine-grained locked skiplists and lock-free skiplists.
 
 * `FineGrained`, `FineGrainedImproved`, etc.: Implementations of skiplists.
   Improved versions include our get() optimization.
-* `benchmark`: Source that generates benchmark data.
+* `benchmarks`: Source that generates benchmark data.
 * `graph`: Graph serving / plotting.
 * `paper`: TeX source and generated PDF for our paper.
 
