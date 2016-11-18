@@ -1,4 +1,6 @@
-# serve
+# serve.go
+
+Serves graphs for data in the `-data` directory.
 
 ## Usage
 
