@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.axis--x path {
+  /*display: none;*/
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 4px;
+}
+
+</style>
+<svg width="1280" height="800"></svg>
+<script src="//d3js.org/d3.v4.min.js"></script>
+<script>
+
+var svg = d3.select("svg"),
+    margin = {top: 20, right: 80, bottom: 30, left: 160},
+    width = svg.attr("width") - margin.left - margin.right,
+    height = svg.attr("height") - margin.top - margin.bottom,
+    g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var x = d3.scaleLog().range([0, width]),
+    y = d3.scaleLinear().range([height, 0]),
+    z = d3.scaleOrdinal(d3.schemeCategory10);
+
+var line = d3.line()
+    .curve(d3.curveBasis)
+    .x(function(d) { return x(d.threads); })
+    .y(function(d) { return y(d.time); });
+
+d3.tsv("{{.Path}}/data.tsv", type, function(error, data) {
+  if (error) throw error;
+
+  var algos = data.columns.slice(1).map(function(id) {
+    return {
+      id: id,
+      values: data.map(function(d) {
+        return {threads: d.threads, time: d[id]};
+      })
+    };
+  });
+
+  x.domain(d3.extent(data, function(d) { return d.threads; }));
+
+  y.domain([
+    d3.min(algos, function(c) { return 0; }),
+    d3.max(algos, function(c) { return d3.max(c.values, function(d) { return d.time; }); })
+  ]);
+
+  z.domain(algos.map(function(c) { return c.id; }));
+
+  g.append("g")
+      .attr("class", "axis axis--x")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x).tickValues([1,2,5,10,20,50,80,100]).tickFormat(d3.format(",.0f")))
+      .style("font", "25px sans-serif")
+    .append("text")
+      .attr("x", width)
+      .attr("dy", "-0.5em")
+      .attr("fill", "#000")
+      .style("font", "25px sans-serif")
+      .text("Threads");
+
+
+  g.append("g")
+      .attr("class", "axis axis--y")
+      .style("font", "25px sans-serif")
+      .call(d3.axisLeft(y))
+      .style("font", "25px sans-serif")
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", "0.71em")
+      .attr("fill", "#000")
+      .style("font", "25px sans-serif")
+      .text("Time, ms");
+
+  var algo = g.selectAll(".algo")
+    .data(algos)
+    .enter().append("g")
+      .attr("class", "algo");
+
+  algo.append("path")
+      .attr("class", "line")
+      .attr("d", function(d) { return line(d.values); })
+      .style("stroke", function(d) { return z(d.id); });
+
+  algo.append("text")
+      .datum(function(d) { return {id: d.id, value: d.values[d.values.length - 1]}; })
+      .attr("transform", function(d) { return "translate(" + x(d.value.threads) + "," + y(d.value.time) + ")"; })
+      .attr("x", 3)
+      .attr("dy", "0.35em")
+      .style("font", "0px sans-serif")
+      .text(function(d) { return d.id; });
+});
+
+function type(d, _, columns) {
+  d.threads = parseInt(d.threads, 10);
+  for (var i = 1, n = columns.length, c; i < n; ++i) d[c = columns[i]] = +d[c]/(1E6);
+  return d;
+}
+
+</script>
+<p>{{.TS}}</p>
